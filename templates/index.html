@@ -1,0 +1,56 @@
+
+
+Index · HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>chatbot // v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="crt">
+    <div class="terminal">
+      <header class="term-head">
+        <div class="term-head-left">
+          <span class="dot"></span>
+          <span class="term-title">chatbot<span class="term-title-dim">.session</span></span>
+        </div>
+        <div class="term-head-right" id="clock">--:--:--</div>
+      </header>
+ 
+      <div class="term-meta">
+        <span>engine: keyword-match v2</span>
+        <span>intents loaded: <span id="intent-count">9</span></span>
+        <span class="status-live">● online</span>
+      </div>
+ 
+      <main class="log" id="log" aria-live="polite">
+        <div class="line bot">
+          <span class="who">BOT&gt;</span>
+          <span class="text">Hi. I only understand a handful of things &mdash; try "hi", "give me advice", or "help".</span>
+        </div>
+      </main>
+ 
+      <form class="prompt-row" id="prompt-form" autocomplete="off">
+        <span class="prompt-label">YOU&gt;</span>
+        <input
+          type="text"
+          id="prompt-input"
+          class="prompt-input"
+          placeholder="type a message..."
+          autofocus
+        >
+        <span class="cursor" aria-hidden="true"></span>
+      </form>
+    </div>
+    <p class="footnote">rule-based bot &middot; no data leaves this server &middot; <a href="https://github.com/06-nitiin/chatbot" target="_blank" rel="noopener">source</a></p>
+  </div>
+ 
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+ 
