@@ -32,3 +32,40 @@ body {
   min-height: 100vh;
   padding: 24px;
 }
+
+.crt {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+}
+
+.crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  border-radius: 10px;
+  z-index: 2;
+}
+
+.terminal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px rgba(255, 176, 0, 0.04),
+    0 30px 60px -20px rgba(0, 0, 0, 0.8),
+    0 0 40px -10px rgba(255, 176, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 560px;
+}
+
