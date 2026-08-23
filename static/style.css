@@ -1,0 +1,34 @@
+:root {
+  --bg: #0a0d0a;
+  --panel: #0f1410;
+  --amber: #ffb000;
+  --amber-dim: #8a6300;
+  --cyan: #5eead4;
+  --cyan-dim: #1f5f56;
+  --text: #d8dcd4;
+  --text-dim: #5c665c;
+  --border: #22281f;
+  --danger: #ff5f56;
+  --font-display: 'Space Mono', monospace;
+  --font-body: 'IBM Plex Mono', monospace;
+}
+ 
+* {
+  box-sizing: border-box;
+}
+ 
+html, body {
+  height: 100%;
+}
+ 
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
