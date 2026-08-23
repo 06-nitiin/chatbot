@@ -1,13 +1,27 @@
-import random
+import random 
 
-R_EATING = "I don't like eating anything because I'm a bot obviously!"
-R_ADVICE = "If I were you, I would go to the internet and type exactly what you wrote there!"
+R_EATING = "I don't eat, I'm a bot, silly!"
+
+R_ADVICE = "Look both ways before crossing the street!"
+
+R_NAME = "I'm a chatbot, I don't have a name :("
+
+R_HELP = (
+    "Here's what I can do:\n"
+    " - Say hi / bye\n"
+    " - Give advice\n"
+    " - Tell you if I eat\n"
+    " - Chat a little\n"
+    "Type 'quit' or 'exit' anytime to leave"
+)
+
+UNKNOWN_RESPONSES = [
+    "Could you please re-phrase that? (I'm a simple bot)",
+    "I said... could you please re-phrase that?",
+    "I am not sure I understand that fully.",
+    "Sorry, I'm not sure I understand.",
+]
 
 
 def unknown():
-    response = ["Could you please re-phrase that? ",
-                "...",
-                "Sounds about right.",
-                "What does that mean?"][
-        random.randrange(4)]
-    return response
+    return random.choice(UNKNOWN_RESPONSES)
