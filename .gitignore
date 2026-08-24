@@ -1,1 +1,14 @@
 .DS_Store
+.vscode/
+.idea/
+
+instance/
+.flaskenv
+
+*.pyo
+*.pyc
+__pyacache__/
+
+venv/
+env/
+.venv/
