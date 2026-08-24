@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+
 from bot_engine import get_response
  
 EXIT_COMMANDS = {"quit", "exit", "bye", "goodbye"}
