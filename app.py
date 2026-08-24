@@ -1,5 +1,9 @@
+from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
- 
+
+
+load_dotenv()
+
 from bot_engine import get_response_with_confidence
  
 app = Flask(__name__)
@@ -25,6 +29,7 @@ def chat():
             "response": response,
             "confidence": confidence,
             "matched": matched,
+            "source": source,
         }
     )
 
