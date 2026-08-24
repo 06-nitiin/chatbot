@@ -12,3 +12,5 @@ __pyacache__/
 venv/
 env/
 .venv/
+
+.env
