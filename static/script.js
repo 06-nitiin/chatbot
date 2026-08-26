@@ -10,7 +10,13 @@ function tick() {
 tick();
 setInterval(tick, 1000);
 
-function addLine(who, text, confidence) {
+const SOURCE_LABELS = {
+  rules: "rules",
+  llm: "ai",
+  fallback: "unmatched",
+};
+
+function addLine(who, text, confidence, source) {
   const line = document.createElement("div");
   line.className = `line ${who}`;
 
@@ -25,10 +31,10 @@ function addLine(who, text, confidence) {
   line.appendChild(whoSpan);
   line.appendChild(textSpan);
 
-  if (who === "bot" && typeof confidence === "number") {
+  if (who === "bot" && source) {
     const tag = document.createElement("span");
-    tag.className = `confidence ${confidence >= 50 ? "high" : "low"}`;
-    tag.textContent = `match ${confidence}%`;
+    tag.className = `confidence source-${source}`;
+    tag.textContent = source === "rules" ? `match ${confidence}%` : SOURCE_LABELS[source] || source;
     line.appendChild(tag);
   }
 
@@ -50,7 +56,7 @@ async function sendMessage(message) {
     }
 
     const data = await res.json();
-    addLine("bot", data.response, data.confidence);
+    addLine("bot", data.response, data.confidence, data.source);
   } catch (err) {
     addLine("bot", "Connection lost. Is the Flask server still running?");
   }

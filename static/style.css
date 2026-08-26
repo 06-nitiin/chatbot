@@ -12,15 +12,15 @@
   --font-display: 'Space Mono', monospace;
   --font-body: 'IBM Plex Mono', monospace;
 }
- 
+
 * {
   box-sizing: border-box;
 }
- 
+
 html, body {
   height: 100%;
 }
- 
+
 body {
   margin: 0;
   background: var(--bg);
@@ -33,6 +33,7 @@ body {
   padding: 24px;
 }
 
+/* Subtle scanline + vignette overlay to sell the CRT feel without overdoing it */
 .crt {
   position: relative;
   width: 100%;
@@ -88,7 +89,7 @@ body {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--dnager);
+  background: var(--danger);
   box-shadow: 16px 0 0 #ffbd2e, 32px 0 0 #27c93f;
   opacity: 0.85;
 }
@@ -102,12 +103,16 @@ body {
   font-size: 14px;
 }
 
+.term-title-dim {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
 .term-head-right {
   font-size: 12px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
-
 
 .term-meta {
   display: flex;
@@ -135,6 +140,10 @@ body {
   line-height: 1.55;
 }
 
+.log::-webkit-scrollbar {
+  width: 8px;
+}
+
 .log::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
@@ -148,7 +157,6 @@ body {
   word-break: break-word;
 }
 
-
 .who {
   flex-shrink: 0;
   font-weight: 600;
@@ -156,11 +164,9 @@ body {
   font-size: 13px;
 }
 
-
 .line.bot .who {
   color: var(--cyan);
 }
-
 
 .line.user .who {
   color: var(--amber);
@@ -195,6 +201,15 @@ body {
   border-color: var(--amber-dim);
 }
 
+.confidence.source-llm {
+  color: #c4b5fd;
+  border-color: #4c3d80;
+}
+
+.confidence.source-fallback {
+  color: var(--text-dim);
+  border-color: var(--border);
+}
 
 .prompt-row {
   display: flex;
@@ -231,7 +246,7 @@ body {
   width: 8px;
   height: 16px;
   background: var(--amber);
-  animation: blink is steps(1) infinite;
+  animation: blink 1s steps(1) infinite;
 }
 
 .prompt-input:focus ~ .cursor {
@@ -246,10 +261,9 @@ body {
 .footnote {
   text-align: center;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 11px;
   margin-top: 14px;
 }
-
 
 .footnote a {
   color: var(--text-dim);
@@ -269,4 +283,3 @@ body {
     gap: 8px 14px;
   }
 }
-
