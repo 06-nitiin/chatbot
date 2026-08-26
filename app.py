@@ -22,7 +22,7 @@ def chat():
     if not user_message:
         return jsonify({"error": "message is required"}), 400
 
-    response, confidence, matched = get_response_with_confidence(user_message)
+    response, confidence, matched, source = get_response_with_confidence(user_message)
 
     return jsonify(
         {
