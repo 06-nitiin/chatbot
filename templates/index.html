@@ -28,7 +28,7 @@
       <main class="log" id="log" aria-live="polite">
         <div class="line bot">
           <span class="who">BOT&gt;</span>
-          <span class="text">Hi. I only understand a handful of things &mdash; try "hi", "give me advice", or "help".</span>
+          <span class="text">Hi. I only understand a handful of things &mdash; try "hi", "give me advice", or "help". You can also click the mic to talk instead of typing.</span>
         </div>
       </main>
 
@@ -38,11 +38,18 @@
           type="text"
           id="prompt-input"
           class="prompt-input"
-          placeholder="type a message..."
+          placeholder="type or speak a message..."
           autofocus
         >
         <span class="cursor" aria-hidden="true"></span>
+        <button type="button" id="mic-button" class="mic-button" title="Speak your message" aria-label="Voice input">
+          <svg class="mic-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path fill="currentColor" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/>
+            <path fill="currentColor" d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/>
+          </svg>
+        </button>
       </form>
+      <div class="mic-status" id="mic-status" aria-live="polite"></div>
     </div>
     <p class="footnote">rule-based bot &middot; no data leaves this server &middot; <a href="https://github.com/06-nitiin/chatbot" target="_blank" rel="noopener">source</a></p>
   </div>
