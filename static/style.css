@@ -242,6 +242,44 @@ body {
   color: var(--text-dim);
 }
 
+.mic-button {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-dim);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s, border-radius 0.15s;
+}
+
+.mic-button:hover {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+}
+
+.mic-button.listening {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(94, 234, 212, 0); }
+}
+
+.mic-status {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 0 16px 8px;
+  min-height: 14px;
+}
+
 .cursor {
   width: 8px;
   height: 16px;
