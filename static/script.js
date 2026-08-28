@@ -88,7 +88,7 @@ if (!SpeechRecognition) {
   micButton.style.display = "none";
 } else {
   const recognition = new SpeechRecognition();
-  recognition.continuous = false;
+  recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = "en-US";
 
@@ -97,7 +97,7 @@ if (!SpeechRecognition) {
   function setListeningState(listening) {
     isListening = listening;
     micButton.classList.toggle("listening", listening);
-    micStatus.textContent = listening ? "listening..." : "";
+    micStatus.textContent = listening ? "listening... (click mic once again)" : "";
   }
 
   micButton.addEventListener("click", () => {
@@ -109,7 +109,7 @@ if (!SpeechRecognition) {
       recognition.start();
       setListeningState(true);
     } catch (err) {
-      // start() throws if called while already running - safe to ignore
+
     }
   });
 
@@ -119,21 +119,16 @@ if (!SpeechRecognition) {
       transcript += event.results[i][0].transcript;
     }
     input.value = transcript;
-
-    // Once we have a final (non-interim) result, auto-submit.
-    const isFinal = event.results[event.results.length - 1].isFinal;
-    if (isFinal) {
-      const message = input.value.trim();
-      if (message) {
-        addLine("user", message);
-        input.value = "";
-        sendMessage(message);
-      }
-    }
   });
 
   recognition.addEventListener("end", () => {
     setListeningState(false);
+    const message = input.value.trim();
+    if (message) {
+      addLine("user", message);
+      input.value = "";
+      sendMessage(message);
+    }
   });
 
   recognition.addEventListener("error", (event) => {
@@ -141,9 +136,9 @@ if (!SpeechRecognition) {
     if (event.error === "not-allowed" || event.error === "service-not-allowed") {
       micStatus.textContent = "Microphone access denied.";
     } else if (event.error === "no-speech") {
-      micStatus.textContent = "Didn't catch that - try again.";
+      micStatus.textContent = "Didn't catch that, please try again.";
     } else {
-      micStatus.textContent = "Voice input error.";
+      micStatus.textContent = "Voice Input Error.";
     }
     setTimeout(() => { micStatus.textContent = ""; }, 3000);
   });
