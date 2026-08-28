@@ -4,6 +4,8 @@ const input = document.getElementById("prompt-input");
 const clock = document.getElementById("clock");
 const micButton = document.getElementById("mic-button");
 const micStatus = document.getElementById("mic-status");
+const typingIndicator = document.getElementById("typing-indicator");
+const clearBtn = document.getElementById("clear-btn");
 
 function tick() {
   const now = new Date();
@@ -44,7 +46,17 @@ function addLine(who, text, confidence, source) {
   log.scrollTop = log.scrollHeight;
 }
 
+function showTyping() {
+  typingIndicator.classList.remove("hidden");
+  log.scrollTop = log.scrollHeight;
+}
+
+function hideTyping() {
+  typingIndicator.classList.add("hidden");
+}
+
 async function sendMessage(message) {
+  showTyping();
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
@@ -53,13 +65,16 @@ async function sendMessage(message) {
     });
 
     if (!res.ok) {
+      hideTyping();
       addLine("bot", "Something went wrong talking to the server.");
       return;
     }
 
     const data = await res.json();
+    hideTyping();
     addLine("bot", data.response, data.confidence, data.source);
   } catch (err) {
+    hideTyping();
     addLine("bot", "Connection lost. Is the Flask server still running?");
   }
 }
@@ -74,17 +89,19 @@ form.addEventListener("submit", (e) => {
   sendMessage(message);
 });
 
-// ---------------------------------------------------------------------------
-// Voice input via the browser's built-in Web Speech API.
-// Supported in Chrome, Edge, and Safari (as of writing). No API key, no
-// network call to any AI service for this part - it's entirely on-device
-// / browser-vendor speech recognition, separate from the chatbot's own logic.
-// ---------------------------------------------------------------------------
+clearBtn.addEventListener("click", async () => {
+  try {
+    await fetch("/api/clear", { method: "POST" });
+    log.innerHTML = "";
+    addLine("bot", "Conversation history cleared. Let's start fresh!");
+  } catch (err) {
+    addLine("bot", "Failed to clear history.");
+  }
+});
+
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
-  // Browser doesn't support it (e.g. Firefox) - hide the button rather than
-  // showing something that will just silently fail on click.
   micButton.style.display = "none";
 } else {
   const recognition = new SpeechRecognition();
@@ -108,9 +125,7 @@ if (!SpeechRecognition) {
     try {
       recognition.start();
       setListeningState(true);
-    } catch (err) {
-
-    }
+    } catch (err) {}
   });
 
   recognition.addEventListener("result", (event) => {
