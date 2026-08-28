@@ -74,16 +74,18 @@ def correct_typos(tokens, cutoff=0.8):
 def message_probability(user_tokens, recognised_words, single_response=False, required_words=None):
     required_words = required_words or []
     user_token_set = set(user_tokens)
- 
+
     matches = len(user_token_set.intersection(recognised_words))
-    percentage = matches / len(recognised_words) if recognised_words else 0
- 
+    recall = matches / len(recognised_words) if recognised_words else 0
+    precision = matches / len(user_token_set) if user_token_set else 0
+
     has_required_words = all(word in user_token_set for word in required_words)
- 
-    if has_required_words or single_response:
-        return int(percentage * 100)
-    return 0
- 
+
+    if not (has_required_words or single_response):
+        return 0
+
+    score = recall if single_response else recall * precision
+    return int(score * 100)
  
 def tokenize(user_input):
     tokens = re.split(r"\s+|[,;?!.-]\s*", user_input.lower().strip())

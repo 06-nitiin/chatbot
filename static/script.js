@@ -119,6 +119,7 @@ if (!SpeechRecognition) {
       transcript += event.results[i][0].transcript;
     }
     input.value = transcript;
+    input.scrollLeft = input.scrollWidth;
   });
 
   recognition.addEventListener("end", () => {
