@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>chatbot // v2</title>
+  <title>chatbot // v3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<base target="_blank">
 </head>
 <body>
   <div class="crt">
@@ -16,21 +17,30 @@
           <span class="dot"></span>
           <span class="term-title">chatbot<span class="term-title-dim">.session</span></span>
         </div>
-        <div class="term-head-right" id="clock">--:--:--</div>
+        <div class="term-head-right">
+          <button id="clear-btn" class="clear-btn" title="Clear conversation">clear</button>
+          <span id="clock">--:--:--</span>
+        </div>
       </header>
 
       <div class="term-meta">
-        <span>engine: keyword-match v2</span>
-        <span>intents loaded: <span id="intent-count">9</span></span>
+        <span>engine: hybrid v3</span>
+        <span>context: <span id="context-status">active</span></span>
+        <span>intents loaded: <span id="intent-count">13</span></span>
         <span class="status-live">● online</span>
       </div>
 
       <main class="log" id="log" aria-live="polite">
         <div class="line bot">
           <span class="who">BOT&gt;</span>
-          <span class="text">Hi. I only understand a handful of things &mdash; try "hi", "give me advice", or "help". You can also click the mic to talk instead of typing.</span>
+          <span class="text">Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.</span>
         </div>
       </main>
+
+      <div class="typing-indicator hidden" id="typing-indicator">
+        <span class="who">BOT&gt;</span>
+        <span class="dots"><span></span><span></span><span></span></span>
+      </div>
 
       <form class="prompt-row" id="prompt-form" autocomplete="off">
         <span class="prompt-label">YOU&gt;</span>
@@ -51,7 +61,7 @@
       </form>
       <div class="mic-status" id="mic-status" aria-live="polite"></div>
     </div>
-    <p class="footnote">rule-based bot &middot; no data leaves this server &middot; <a href="https://github.com/06-nitiin/chatbot" target="_blank" rel="noopener">source</a></p>
+    <p class="footnote">context-aware bot &middot; local AI fallback &middot; <a href="https://github.com/06-nitiin/chatbot" target="_blank" rel="noopener">source</a></p>
   </div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>

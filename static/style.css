@@ -13,13 +13,9 @@
   --font-body: 'IBM Plex Mono', monospace;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   margin: 0;
@@ -33,7 +29,6 @@ body {
   padding: 24px;
 }
 
-/* Subtle scanline + vignette overlay to sell the CRT feel without overdoing it */
 .crt {
   position: relative;
   width: 100%;
@@ -109,9 +104,29 @@ body {
 }
 
 .term-head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 12px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
+}
+
+.clear-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.clear-btn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
 .term-meta {
@@ -209,6 +224,49 @@ body {
 .confidence.source-fallback {
   color: var(--text-dim);
   border-color: var(--border);
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-top: 1px dashed var(--border);
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.typing-indicator.hidden {
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.typing-indicator .who {
+  color: var(--cyan);
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+}
+
+.dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--cyan-dim);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.dots span:nth-child(1) { animation-delay: -0.32s; }
+.dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); background: var(--cyan); }
 }
 
 .prompt-row {
