@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -65,3 +66,38 @@ def ask_llm(user_message, history=None, timeout=10):
         return data["candidates"][0]["content"]["parts"][0]["text"].strip()
     except (requests.RequestException, KeyError, IndexError) as exc:
         raise LLMUnavailable(str(exc)) from exc
+
+def ask_llm_stream(user_message, history=None, timeout=30):
+    if not GEMINI_API_KEY:
+        raise LLMUnavailable("GEMINI_API_KEY is not set")
+
+    stream_url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:streamGenerateContent"
+    )
+    payload = {
+        "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
+        "contents": build_contents(user_message, history),
+        "generationConfig": {"maxOutputTokens": 200, "temperature": 0.7},
+    }
+
+    with requests.post(
+        stream_url,
+        params={"key": GEMINI_API_KEY, "alt": "sse"},
+        json=payload,
+        stream=True,
+        timeout=timeout,
+    ) as response:
+        response.raise_for_status()
+        for line in response.iter_lines(decode_unicode=True):
+            if not line or not line.startswith("data: "):
+                continue
+            data_str = line[len("data: "):].strip()
+            if not data_str or data_str == "[DONE]":
+                continue
+            try:
+                chunk = json.loads(data_str)
+                text = chunk["candidates"][0]["content"]["parts"][0]["text"]
+                if text:
+                    yield text
+            except (KeyError, IndexError, json.JSONDecodeError):
+                continue 
