@@ -4,6 +4,9 @@ const input = document.getElementById("prompt-input");
 const clock = document.getElementById("clock");
 const micButton = document.getElementById("mic-button");
 const micStatus = document.getElementById("mic-status");
+const clearButton = document.getElementById("clear-btn");
+
+const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
 
 function tick() {
   const now = new Date();
@@ -43,6 +46,32 @@ function addLine(who, text, confidence, source) {
   log.appendChild(line);
   log.scrollTop = log.scrollHeight;
 }
+
+async function clearConversation() {
+  clearButton.disabled = true;
+
+  try {
+    const response = await fetch("/api/clear", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not clear the conversation");
+    }
+
+    log.replaceChildren();
+    addLine("bot", WELCOME_MESSAGE);
+    input.value = "";
+    input.focus();
+  } catch (error) {
+    addLine("bot", "I couldn't clear the conversation. Please try again.");
+  } finally {
+    clearButton.disabled = false;
+  }
+}
+
+clearButton.addEventListener("click", clearConversation);
 
 async function streamMessage(message) {
   const botLine = document.createElement("div");
@@ -89,7 +118,7 @@ async function streamMessage(message) {
 
       buffer += decoder.decode(value, { stream: true });
       const events = buffer.split("\n\n");
-      buffer = events.pop(); // last (possibly incomplete) chunk stays in buffer
+      buffer = events.pop();
 
       for (const evt of events) {
         if (!evt.startsWith("data: ")) continue;
@@ -122,7 +151,7 @@ async function streamMessage(message) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: fullText }),
-    }).catch(() => {}); // best-effort, don't block the UI on this
+    }).catch(() => {});
   }
 }
 
@@ -156,14 +185,14 @@ if (!SpeechRecognition) {
 
   micButton.addEventListener("click", () => {
     if (isListening) {
-      recognition.stop(); // manual stop -> triggers "end" -> submits below
+      recognition.stop();
       return;
     }
     try {
       recognition.start();
       setListeningState(true);
     } catch (err) {
-      
+      // The browser may reject repeated start calls while recognition is active.
     }
   });
 
