@@ -33,7 +33,7 @@ def save_history(history):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", intent_count=len(bot_engine.INTENTS))
 
 
 @app.route("/api/chat", methods=["POST"])
