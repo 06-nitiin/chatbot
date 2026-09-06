@@ -1,5 +1,6 @@
 import json
 import os
+import secrets
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request, session, stream_with_context
@@ -13,7 +14,23 @@ import llm_fallback
 import long_responses as long
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-me")
+configured_secret_key = os.environ.get("FLASK_SECRET_KEY")
+app.secret_key = configured_secret_key or secrets.token_hex(32)
+
+# Keep session contents inaccessible to browser JavaScript and prevent cross-site
+# requests from attaching the session cookie in most cases. Set
+# SESSION_COOKIE_SECURE=true in HTTPS production deployments.
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("SESSION_COOKIE_SECURE", "false").lower() == "true",
+)
+
+if not configured_secret_key:
+    app.logger.warning(
+        "FLASK_SECRET_KEY is not set; using a temporary session key. "
+        "Set FLASK_SECRET_KEY before deploying."
+    )
 
 
 limiter = Limiter(get_remote_address, app=app, default_limits=["60 per hour"])
