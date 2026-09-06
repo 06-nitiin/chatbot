@@ -20,7 +20,7 @@ ROLE_MAP = {"user": "user", "bot": "model"}
 
 
 class LLMUnavailable(Exception):
-    """Raised when the LLM fallback can't be used (no key, network error, etc.)."""
+    """Raised when the LLM fallback can't be used."""
 
 
 def is_configured():
@@ -38,66 +38,82 @@ def build_contents(user_message, history=None):
     return contents
 
 
-def ask_llm(user_message, history=None, timeout=10):
-    """
-    Sends the message (plus recent conversation history, if given) to
-    Gemini's free API tier and returns the text reply. Raises
-    LLMUnavailable if the key is missing or the request fails, so callers
-    can gracefully fall back to the bot's own 'unknown' response.
-    """
-    if not GEMINI_API_KEY:
-        raise LLMUnavailable("GEMINI_API_KEY is not set")
-
-    payload = {
+def request_payload(user_message, history=None):
+    return {
         "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": build_contents(user_message, history),
         "generationConfig": {"maxOutputTokens": 200, "temperature": 0.7},
     }
 
+
+def ask_llm(user_message, history=None, timeout=10):
+    """
+    Sends the message and recent conversation history to Gemini.
+    Raises LLMUnavailable when the key, network request, or response is unusable.
+    """
+    if not GEMINI_API_KEY:
+        raise LLMUnavailable("GEMINI_API_KEY is not set")
+
     try:
         response = requests.post(
             GEMINI_URL,
             params={"key": GEMINI_API_KEY},
-            json=payload,
+            json=request_payload(user_message, history),
             timeout=timeout,
         )
         response.raise_for_status()
         data = response.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except (requests.RequestException, KeyError, IndexError) as exc:
+        text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        if not text:
+            raise LLMUnavailable("Gemini returned an empty response")
+        return text
+    except LLMUnavailable:
+        raise
+    except (requests.RequestException, KeyError, IndexError, TypeError, ValueError) as exc:
         raise LLMUnavailable(str(exc)) from exc
 
+
 def ask_llm_stream(user_message, history=None, timeout=30):
+    """Yield Gemini response chunks, converting failures to LLMUnavailable."""
     if not GEMINI_API_KEY:
         raise LLMUnavailable("GEMINI_API_KEY is not set")
 
     stream_url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:streamGenerateContent"
     )
-    payload = {
-        "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
-        "contents": build_contents(user_message, history),
-        "generationConfig": {"maxOutputTokens": 200, "temperature": 0.7},
-    }
 
-    with requests.post(
-        stream_url,
-        params={"key": GEMINI_API_KEY, "alt": "sse"},
-        json=payload,
-        stream=True,
-        timeout=timeout,
-    ) as response:
-        response.raise_for_status()
-        for line in response.iter_lines(decode_unicode=True):
-            if not line or not line.startswith("data: "):
-                continue
-            data_str = line[len("data: "):].strip()
-            if not data_str or data_str == "[DONE]":
-                continue
-            try:
-                chunk = json.loads(data_str)
-                text = chunk["candidates"][0]["content"]["parts"][0]["text"]
+    try:
+        with requests.post(
+            stream_url,
+            params={"key": GEMINI_API_KEY, "alt": "sse"},
+            json=request_payload(user_message, history),
+            stream=True,
+            timeout=timeout,
+        ) as response:
+            response.raise_for_status()
+            yielded_text = False
+
+            for line in response.iter_lines(decode_unicode=True):
+                if not line or not line.startswith("data: "):
+                    continue
+
+                data_str = line[len("data: "):].strip()
+                if not data_str or data_str == "[DONE]":
+                    continue
+
+                try:
+                    chunk = json.loads(data_str)
+                    text = chunk["candidates"][0]["content"]["parts"][0]["text"]
+                except (KeyError, IndexError, TypeError, json.JSONDecodeError):
+                    continue
+
                 if text:
+                    yielded_text = True
                     yield text
-            except (KeyError, IndexError, json.JSONDecodeError):
-                continue 
+
+            if not yielded_text:
+                raise LLMUnavailable("Gemini returned an empty streaming response")
+    except LLMUnavailable:
+        raise
+    except (requests.RequestException, TypeError, ValueError) as exc:
+        raise LLMUnavailable(str(exc)) from exc
