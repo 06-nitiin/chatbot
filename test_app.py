@@ -37,6 +37,22 @@ class FlaskRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json(), {"error": "message is required"})
 
+    def test_chat_rejects_a_non_string_message(self):
+        response = self.client.post("/api/chat", json={"message": ["hello"]})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {"error": "message is required"})
+
+    def test_chat_rejects_a_malformed_json_body(self):
+        response = self.client.post(
+            "/api/chat",
+            data="not valid json",
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json(), {"error": "message is required"})
+
     def test_chat_returns_rule_response_and_metadata(self):
         response = self.client.post("/api/chat", json={"message": "thanks"})
         data = response.get_json()

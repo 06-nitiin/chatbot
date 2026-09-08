@@ -48,6 +48,21 @@ def save_history(history):
     session["history"] = history[-MAX_HISTORY:]
 
 
+def get_message_from_request():
+    """Return a trimmed message string, or None for an invalid/empty request."""
+    data = request.get_json(silent=True) or {}
+    message = data.get("message")
+    if not isinstance(message, str):
+        return None
+
+    message = message.strip()
+    return message or None
+
+
+def missing_message_response():
+    return jsonify({"error": "message is required"}), 400
+
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -61,11 +76,9 @@ def index():
 @app.route("/api/chat", methods=["POST"])
 @limiter.limit("15 per minute")
 def chat():
-    data = request.get_json(silent=True) or {}
-    user_message = (data.get("message") or "").strip()
-
-    if not user_message:
-        return jsonify({"error": "message is required"}), 400
+    user_message = get_message_from_request()
+    if user_message is None:
+        return missing_message_response()
 
     history = get_history()
     response, confidence, matched, source, intent_id = bot_engine.get_response_with_confidence(
@@ -90,11 +103,9 @@ def chat():
 @app.route("/api/chat/stream", methods=["POST"])
 @limiter.limit("15 per minute")
 def chat_stream():
-    data = request.get_json(silent=True) or {}
-    user_message = (data.get("message") or "").strip()
-
-    if not user_message:
-        return jsonify({"error": "message is required"}), 400
+    user_message = get_message_from_request()
+    if user_message is None:
+        return missing_message_response()
 
     history = get_history()
     response_text, confidence, matched, intent_id = bot_engine.best_rule_match(user_message)
@@ -142,10 +153,9 @@ def chat_stream():
 
 @app.route("/api/chat/append-bot-reply", methods=["POST"])
 def append_bot_reply():
-    data = request.get_json(silent=True) or {}
-    message = (data.get("message") or "").strip()
-    if not message:
-        return jsonify({"error": "message is required"}), 400
+    message = get_message_from_request()
+    if message is None:
+        return missing_message_response()
 
     history = get_history()
     history.append({"role": "bot", "message": message})
