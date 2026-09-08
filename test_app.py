@@ -16,6 +16,12 @@ class FlaskRouteTests(unittest.TestCase):
     def setUp(self):
         self.client = app_module.app.test_client()
 
+    def test_health_endpoint_returns_ok(self):
+        response = self.client.get("/health")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {"status": "ok"})
+
     def test_homepage_uses_the_current_intent_count(self):
         response = self.client.get("/")
 

@@ -48,6 +48,11 @@ def save_history(history):
     session["history"] = history[-MAX_HISTORY:]
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"})
+
+
 @app.route("/")
 def index():
     return render_template("index.html", intent_count=len(bot_engine.INTENTS))
