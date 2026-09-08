@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import app as app_module
 
@@ -40,6 +41,43 @@ class FlaskRouteTests(unittest.TestCase):
         self.assertEqual(data["intent"], "thanks_reply")
         self.assertTrue(data["matched"])
 
+    def test_stream_returns_rule_response_and_done_event(self):
+        response = self.client.post("/api/chat/stream", json={"message": "thanks"})
+        body = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "text/event-stream")
+        self.assertIn('"type": "chunk"', body)
+        self.assertIn("You're welcome!", body)
+        self.assertIn('"source": "rules"', body)
+        self.assertIn('"intent": "thanks_reply"', body)
+
+    @patch.object(app_module.llm_fallback, "is_configured", return_value=False)
+    def test_stream_uses_canned_fallback_when_llm_is_not_configured(self, _mock_is_configured):
+        response = self.client.post(
+            "/api/chat/stream",
+            json={"message": "tell me something unrelated"},
+        )
+        body = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, "text/event-stream")
+        self.assertIn('"type": "chunk"', body)
+        self.assertIn('"text": "', body)
+        self.assertIn('"source": "fallback"', body)
+
+    def test_stream_saves_rule_conversation_history(self):
+        self.client.post("/api/chat/stream", json={"message": "thanks"})
+
+        with self.client.session_transaction() as session:
+            self.assertEqual(
+                session["history"],
+                [
+                    {"role": "user", "message": "thanks"},
+                    {"role": "bot", "message": "You're welcome!"},
+                ],
+            )
+
     def test_clear_removes_the_session_history(self):
         with self.client.session_transaction() as session:
             session["history"] = [
@@ -53,6 +91,20 @@ class FlaskRouteTests(unittest.TestCase):
         self.assertEqual(response.get_json(), {"status": "cleared"})
         with self.client.session_transaction() as session:
             self.assertNotIn("history", session)
+
+    def test_append_bot_reply_saves_a_valid_reply(self):
+        response = self.client.post(
+            "/api/chat/append-bot-reply",
+            json={"message": "This is a streamed reply."},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {"status": "ok"})
+        with self.client.session_transaction() as session:
+            self.assertEqual(
+                session["history"],
+                [{"role": "bot", "message": "This is a streamed reply."}],
+            )
 
     def test_append_bot_reply_rejects_an_empty_message(self):
         response = self.client.post("/api/chat/append-bot-reply", json={"message": ""})
