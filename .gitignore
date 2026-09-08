@@ -1,16 +1,35 @@
+# Operating-system files
 .DS_Store
+
+# Editor and IDE settings
 .vscode/
 .idea/
 
+# Flask and local application state
 instance/
 .flaskenv
 
-*.pyo
-*.pyc
-__pyacache__/
+# Environment files and secrets
+.env
+.env.*
+!.env.example
 
+# Python bytecode and caches
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
 venv/
 env/
 .venv/
 
-.env
+# Test and coverage output
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Logs and local output
+*.log
