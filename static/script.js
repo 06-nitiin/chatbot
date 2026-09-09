@@ -5,8 +5,10 @@ const clock = document.getElementById("clock");
 const micButton = document.getElementById("mic-button");
 const micStatus = document.getElementById("mic-status");
 const clearButton = document.getElementById("clear-btn");
+const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
+let isStreaming = false;
 
 function tick() {
   const now = new Date();
@@ -20,6 +22,18 @@ const SOURCE_LABELS = {
   llm: "ai",
   fallback: "unmatched",
 };
+
+function setBusyState(busy) {
+  isStreaming = busy;
+  input.disabled = busy;
+  clearButton.disabled = busy;
+  micButton.disabled = busy;
+  typingIndicator.classList.toggle("hidden", !busy);
+
+  if (!busy) {
+    input.focus();
+  }
+}
 
 function addLine(who, text, confidence, source) {
   const line = document.createElement("div");
@@ -48,6 +62,8 @@ function addLine(who, text, confidence, source) {
 }
 
 async function clearConversation() {
+  if (isStreaming) return;
+
   clearButton.disabled = true;
 
   try {
@@ -74,6 +90,9 @@ async function clearConversation() {
 clearButton.addEventListener("click", clearConversation);
 
 async function streamMessage(message) {
+  if (isStreaming) return;
+  setBusyState(true);
+
   const botLine = document.createElement("div");
   botLine.className = "line bot";
   const whoSpan = document.createElement("span");
@@ -137,6 +156,8 @@ async function streamMessage(message) {
   } catch (err) {
     textSpan.textContent = fullText || "Connection lost. Is the Flask server still running?";
     return;
+  } finally {
+    setBusyState(false);
   }
 
   if (source) {
@@ -157,6 +178,8 @@ async function streamMessage(message) {
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+  if (isStreaming) return;
+
   const message = input.value.trim();
   if (!message) return;
 
@@ -184,6 +207,8 @@ if (!SpeechRecognition) {
   }
 
   micButton.addEventListener("click", () => {
+    if (isStreaming) return;
+
     if (isListening) {
       recognition.stop();
       return;
@@ -208,7 +233,7 @@ if (!SpeechRecognition) {
   recognition.addEventListener("end", () => {
     setListeningState(false);
     const message = input.value.trim();
-    if (message) {
+    if (message && !isStreaming) {
       addLine("user", message);
       input.value = "";
       streamMessage(message);
