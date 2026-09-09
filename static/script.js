@@ -35,6 +35,17 @@ function setBusyState(busy) {
   }
 }
 
+function parseSsePayload(eventText) {
+  if (!eventText.startsWith("data: ")) return null;
+
+  try {
+    return JSON.parse(eventText.slice(6));
+  } catch (error) {
+    // Ignore malformed individual events and continue reading the stream.
+    return null;
+  }
+}
+
 function addLine(who, text, confidence, source) {
   const line = document.createElement("div");
   line.className = `line ${who}`;
@@ -139,11 +150,11 @@ async function streamMessage(message) {
       const events = buffer.split("\n\n");
       buffer = events.pop();
 
-      for (const evt of events) {
-        if (!evt.startsWith("data: ")) continue;
-        const payload = JSON.parse(evt.slice(6));
+      for (const eventText of events) {
+        const payload = parseSsePayload(eventText);
+        if (!payload) continue;
 
-        if (payload.type === "chunk") {
+        if (payload.type === "chunk" && typeof payload.text === "string") {
           fullText += payload.text;
           textSpan.textContent = fullText;
           log.scrollTop = log.scrollHeight;
