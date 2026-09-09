@@ -124,9 +124,21 @@ body {
   transition: all 0.15s;
 }
 
-.clear-btn:hover {
+.clear-btn:hover:not(:disabled) {
   color: var(--danger);
   border-color: var(--danger);
+}
+
+.clear-btn:disabled,
+.mic-button:disabled,
+.prompt-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.clear-btn:disabled {
+  color: var(--text-dim);
+  border-color: var(--border);
 }
 
 .term-meta {
@@ -312,10 +324,10 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: color 0.15s, border-radius 0.15s;
+  transition: color 0.15s, border-color 0.15s;
 }
 
-.mic-button:hover {
+.mic-button:hover:not(:disabled) {
   color: var(--amber);
   border-color: var(--amber-dim);
 }
@@ -345,7 +357,8 @@ body {
   animation: blink 1s steps(1) infinite;
 }
 
-.prompt-input:focus ~ .cursor {
+.prompt-input:focus ~ .cursor,
+.prompt-input:disabled ~ .cursor {
   display: none;
 }
 
