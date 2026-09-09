@@ -1,104 +1,190 @@
 # chatbot
 
-A hybrid chatbot that started life as a two-file terminal keyword-matcher and has since grown into a deployed, context-aware, voice-enabled web app. Fast, free, deterministic rule-based matching handles common stuff (greetings, small talk); an AI fallback (Google Gemini's free API tier) with real conversation memory handles everything else.
+A hybrid chatbot that combines deterministic rule-based responses with a Gemini AI fallback. Common messages are handled locally and quickly, while unmatched messages can use Gemini with recent conversation context.
 
-**🔴 Live demo:** [health-chatbot-7afg.onrender.com](https://health-chatbot-7afg.onrender.com)
-*(hosted on Render's free tier — the first load after inactivity can take ~30 seconds to wake up)*
-
+**Live demo:** [health-chatbot-7afg.onrender.com](https://health-chatbot-7afg.onrender.com)
 
 ## Features
 
-- **Rule-based matching first.** Scores your message against predefined intents using word overlap (with typo tolerance via fuzzy matching), so common phrases get instant, free, deterministic replies with no API call at all.
-- **AI fallback with memory.** Anything the rules can't confidently handle goes to Gemini's free API tier — and the bot actually remembers the conversation, so follow-ups like "another one" or "what about that city's population?" work correctly instead of being treated as a cold start each time.
-- **Precision-weighted scoring.** Long, unrelated messages that happen to contain one common word (like "how" or "you") don't get hijacked by a short rule-based intent — the matcher checks how much of *your message* the intent actually explains, not just whether a keyword showed up anywhere in it.
-- **Voice input.** Click the mic and talk instead of typing, using the browser's built-in Web Speech API (Chrome/Edge/Safari). Continuous listening means pausing mid-sentence to think doesn't cut you off — click the mic again when you're done to send.
-- **Per-user session memory**, with a `clear` button to reset the conversation on demand.
-- **Every reply is tagged with its source** (`rules`, `ai`, or `unmatched`) so you can see which path handled it.
-- **Deployed for free** on Render, from a GitHub repo, with zero paid services anywhere in the stack.
+- Rule-based intent matching with fuzzy typo tolerance.
+- Precision-weighted matching to reduce false positives.
+- Gemini AI fallback with recent conversation memory.
+- Canned fallback responses when Gemini is unavailable or unconfigured.
+- Streaming responses through Server-Sent Events.
+- Browser voice input through the Web Speech API.
+- Clear conversation control.
+- Response source labels for rules, AI, and unmatched fallback responses.
+- Request validation for empty, malformed, and non-string messages.
+- Session cookie security settings for local and HTTPS production use.
+- Health-check endpoint for service monitoring.
+- Offline automated tests for the rule engine, Gemini fallback, and Flask routes.
 
 ## How it works
 
-1. **Rules first.** `bot_engine.py` scores your message against a list of intents. If one scores above the confidence threshold, that's the reply — no network call, instant, free.
-2. **AI fallback, with context.** If nothing matches confidently and a `GEMINI_API_KEY` is configured, the message — plus recent conversation history from the Flask session — is sent to Gemini for a real generated reply.
-3. **Canned fallback.** If neither applies (no key configured, or the API call fails), the bot returns a generic "I don't understand" response instead of erroring out.
+1. `bot_engine.py` checks the message against the configured intents.
+2. A sufficiently confident match returns an immediate local response.
+3. An unmatched message is sent to Gemini when `GEMINI_API_KEY` is configured.
+4. If Gemini is unavailable, the application returns a canned fallback response.
+5. Recent conversation turns are stored in the Flask session, with a maximum of 20 entries.
 
 ## Project structure
 
-```
+```text
 chatbot/
-├── app.py               # Flask server — routes, session handling
-├── bot_engine.py          # Core matching logic + fallback routing
-├── llm_fallback.py         # Calls Gemini's free API, with conversation history
-├── mains.py                # Terminal/CLI version of the bot
-├── long_responses.py      # Canned longer replies + fallback responses
+├── app.py                 # Flask server, routes, sessions, and validation
+├── bot_engine.py          # Intent matching and response routing
+├── llm_fallback.py        # Gemini requests and streaming fallback
+├── long_responses.py      # Canned responses and fallback messages
+├── mains.py               # Terminal/CLI version of the bot
 ├── requirements.txt
-├── .env.example             # Template for your local secrets — copy to .env
+├── test_app.py            # Flask route and API tests
+├── test_bot_engine.py     # Rule-engine tests
+├── test_llm_fallback.py   # Offline Gemini fallback tests
+├── .env.example           # Safe environment-variable template
 ├── templates/
-│   └── index.html         # Chat UI page
+│   └── index.html         # Chat interface
 └── static/
-    ├── style.css           # Terminal-style visual design
-    └── script.js           # Chat logic, voice input, talks to /api/chat
+    ├── style.css          # Visual design and busy states
+    └── script.js           # Chat, streaming, voice input, and controls
 ```
 
 ## Setup
 
+Create and activate a virtual environment:
+
 ```bash
 python3 -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
-python3 -m pip install -r requirements.txt
+source venv/bin/activate
 ```
 
-### Environment variables
+Install the dependencies:
 
-Copy the template and fill in your own values:
+```bash
+python -m pip install -r requirements.txt
+```
+
+Copy the environment template:
+
 ```bash
 cp .env.example .env
 ```
 
-You'll need two:
+Configure the local `.env` file with your own values:
 
-- **`GEMINI_API_KEY`** — free, no credit card required. Get one at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
-- **`FLASK_SECRET_KEY`** — used to cryptographically sign session cookies (this is what makes conversation memory work). Generate one yourself:
-  ```bash
-  python3 -c "import secrets; print(secrets.token_hex(32))"
-  ```
-
-`.env` is gitignored, so neither of these ever gets committed. If you skip `GEMINI_API_KEY`, unmatched messages just get the generic fallback reply instead of an AI-generated one. `FLASK_SECRET_KEY` has a hardcoded development fallback in `app.py`, but you should always set a real one before deploying anywhere public.
-
-## Running it
-
-**Web app:**
-```bash
-python3 app.py
+```env
+GEMINI_API_KEY=your-gemini-api-key
+FLASK_SECRET_KEY=your-existing-secret-key
+SESSION_COOKIE_SECURE=false
 ```
-Then open `http://127.0.0.1:5000`.
 
-**Terminal version:**
-```bash
-python3 mains.py
+`GEMINI_MODEL` is optional. `.env` is ignored by Git and must never be committed.
+
+For Render or another HTTPS deployment, set:
+
+```text
+SESSION_COOKIE_SECURE=true
 ```
+
+Use the same `FLASK_SECRET_KEY` across local or production restarts when you want existing signed sessions to remain valid. Rotate it only if the old value may have been exposed.
+
+## Running locally
+
+Start the web application:
+
+```bash
+python app.py
+```
+
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+Check the service health in another terminal:
+
+```bash
+curl http://127.0.0.1:5000/health
+```
+
+Expected response:
+
+```json
+{"status":"ok"}
+```
+
+Run the terminal version:
+
+```bash
+python mains.py
+```
+
 Type `quit` or `exit` to leave.
 
-## Try asking it
+## Testing
 
-- `hi` / `hello` — rule-based
-- `give me advice` — rule-based, then say `another one` — tests memory, since the AI needs the prior turn to know what you mean
-- Anything off-script, e.g. `what's a good name for a pet rock?` — goes to the AI fallback
-- Click the mic and just talk — try pausing mid-sentence to confirm it doesn't cut you off
+Run the complete offline test suite:
+
+```bash
+python -m unittest discover -v
+```
+
+The tests do not call Gemini or require a real API key. They cover the intent engine, Gemini error handling, streaming behavior, session history, request validation, health checks, and Flask routes.
+
+Check Python syntax:
+
+```bash
+python -m py_compile app.py bot_engine.py llm_fallback.py test_app.py test_bot_engine.py test_llm_fallback.py
+```
+
+## Useful test messages
+
+- `hi` or `hello` — rule-based greeting.
+- `thanks` — rule-based response.
+- `give me advice` — rule-based advice response.
+- `another one` — tests conversation context through the AI fallback.
+- `what's a good name for a pet rock?` — typically uses the AI fallback.
+
+## Health endpoint
+
+The `GET /health` endpoint returns a small JSON response without using the chatbot engine or Gemini:
+
+```json
+{"status":"ok"}
+```
+
+It can be used by a monitoring service or to confirm that a local or deployed Flask process is responding.
 
 ## Deployment
 
-This runs on Render's free tier via `gunicorn app:app`. To deploy your own copy:
+The application is configured for Render with:
 
-1. Push your repo to GitHub.
-2. Create a new Web Service on [render.com](https://render.com), connect the repo.
-3. Build command: `pip install -r requirements.txt`. Start command: `gunicorn app:app`.
-4. Add `GEMINI_API_KEY` and `FLASK_SECRET_KEY` as environment variables in Render's dashboard (Environment tab) — these are never read from your local `.env` file, so this step is required separately.
-5. Deploy. Render auto-redeploys on every push to your connected branch by default.
+```text
+Build command: pip install -r requirements.txt
+Start command: gunicorn app:app
+```
 
-## Notes
+Configure these environment variables in Render’s dashboard rather than committing them to Git:
 
-- Flask's dev server (`python3 app.py`) is fine for local use; production traffic goes through `gunicorn` instead, which is what Render actually runs.
-- The matching logic lives in `bot_engine.py` — add a new dict to `INTENTS` with a `response`, `words`, and either `single_response` or `required_words` to extend it.
-- Free API tiers change their limits and model names over time. If `llm_fallback.py` stops working, check whether Google has deprecated the current model (this has already happened once during development) and update `GEMINI_MODEL` in `.env` accordingly.
-- Never commit your real `.env` file. If you ever do by accident, revoke both keys immediately and generate new ones.
+- `GEMINI_API_KEY`
+- `FLASK_SECRET_KEY`
+- `SESSION_COOKIE_SECURE=true`
+- Optional: `GEMINI_MODEL`
+
+Keep development work on a feature branch, run the tests locally, and merge into `main` only when the changes are ready for the connected Render service:
+
+```bash
+git switch feature/new
+python -m unittest discover -v
+git add .
+git commit -m "Describe the update"
+git push origin feature/new
+
+# When ready for deployment
+git switch main
+git pull origin main
+git merge feature/new
+git push origin main
+```
+
+## Adding a rule-based intent
+
+Add a dictionary to `INTENTS` in `bot_engine.py` with an `id`, `response`, `words`, and either `single_response` or `required_words`. Add longer reusable text to `long_responses.py` when appropriate, then add a regression test to `test_bot_engine.py`.
+
+Never commit `.env`, API keys, or production secrets. If a secret is exposed, revoke it and generate a replacement immediately.
