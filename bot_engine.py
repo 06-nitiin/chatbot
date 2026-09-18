@@ -59,6 +59,30 @@ INTENTS = [
         "words": ["help", "what", "can", "you", "do"],
         "required_words": ["help"],
     },
+    {
+        "id": "capabilities",
+        "response": long.R_CAPABILITIES,
+        "words": ["what", "can", "you", "do"],
+        "required_words": ["can", "do"],
+    },
+    {
+        "id": "creator",
+        "response": long.R_CREATOR,
+        "words": ["who", "created", "made", "built", "you"],
+        "required_words": ["who", "created"],
+    },
+    {
+        "id": "joke",
+        "response": long.R_JOKE,
+        "words": ["tell", "me", "a", "joke"],
+        "required_words": ["joke"],
+    },
+    {
+        "id": "quote",
+        "response": long.R_QUOTE,
+        "words": ["give", "me", "a", "quote"],
+        "required_words": ["quote"],
+    },
 ]
 
 ALL_KNOWN_WORDS = sorted({word for intent in INTENTS for word in intent["words"]})
