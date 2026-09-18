@@ -1,6 +1,7 @@
 import unittest
 
 import bot_engine
+import long_responses
 
 
 class BestRuleMatchTests(unittest.TestCase):
@@ -37,6 +38,46 @@ class BestRuleMatchTests(unittest.TestCase):
         self.assertIsNone(response)
         self.assertIsNone(intent_id)
         self.assertLess(confidence, bot_engine.CONFIDENCE_THRESHOLD)
+
+    def test_capabilities_intent(self):
+        response, confidence, matched, intent_id = bot_engine.best_rule_match(
+            "What can you do?"
+        )
+
+        self.assertTrue(matched)
+        self.assertEqual(intent_id, "capabilities")
+        self.assertEqual(response, long_responses.R_CAPABILITIES)
+        self.assertGreaterEqual(confidence, bot_engine.CONFIDENCE_THRESHOLD)
+
+    def test_creator_intent(self):
+        response, confidence, matched, intent_id = bot_engine.best_rule_match(
+            "Who created you?"
+        )
+
+        self.assertTrue(matched)
+        self.assertEqual(intent_id, "creator")
+        self.assertEqual(response, long_responses.R_CREATOR)
+        self.assertGreaterEqual(confidence, bot_engine.CONFIDENCE_THRESHOLD)
+
+    def test_joke_intent(self):
+        response, confidence, matched, intent_id = bot_engine.best_rule_match(
+            "Tell me a joke"
+        )
+
+        self.assertTrue(matched)
+        self.assertEqual(intent_id, "joke")
+        self.assertEqual(response, long_responses.R_JOKE)
+        self.assertGreaterEqual(confidence, bot_engine.CONFIDENCE_THRESHOLD)
+
+    def test_quote_intent(self):
+        response, confidence, matched, intent_id = bot_engine.best_rule_match(
+            "Give me a quote"
+        )
+
+        self.assertTrue(matched)
+        self.assertEqual(intent_id, "quote")
+        self.assertEqual(response, long_responses.R_QUOTE)
+        self.assertGreaterEqual(confidence, bot_engine.CONFIDENCE_THRESHOLD)
 
 
 class ResponseRoutingTests(unittest.TestCase):
