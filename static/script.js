@@ -46,6 +46,47 @@ function parseSsePayload(eventText) {
   }
 }
 
+async function copyText(text, button) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      textArea.remove();
+    }
+
+    const originalText = button.textContent;
+    button.textContent = "Copied";
+    button.disabled = true;
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.disabled = false;
+    }, 1500);
+  } catch (error) {
+    button.textContent = "Copy failed";
+    setTimeout(() => {
+      button.textContent = "Copy";
+    }, 1500);
+  }
+}
+
+function addCopyButton(botLine, getText) {
+  const copyButton = document.createElement("button");
+  copyButton.type = "button";
+  copyButton.className = "copy-btn";
+  copyButton.textContent = "Copy";
+  copyButton.title = "Copy this response";
+  copyButton.addEventListener("click", () => copyText(getText(), copyButton));
+  botLine.appendChild(copyButton);
+}
+
 function addLine(who, text, confidence, source) {
   const line = document.createElement("div");
   line.className = `line ${who}`;
@@ -176,6 +217,10 @@ async function streamMessage(message) {
     tag.className = `confidence source-${source}`;
     tag.textContent = source === "rules" ? `match ${confidence}%` : (SOURCE_LABELS[source] || source);
     botLine.appendChild(tag);
+  }
+
+  if (fullText) {
+    addCopyButton(botLine, () => fullText);
   }
 
   if (source === "llm" && fullText) {
