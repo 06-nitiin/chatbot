@@ -13,6 +13,33 @@ class LLMFallbackTests(unittest.TestCase):
     def tearDown(self):
         llm_fallback.GEMINI_API_KEY = self.original_api_key
 
+    def test_system_prompt_contains_core_response_rules(self):
+        self.assertIn("friendly and concise assistant", llm_fallback.SYSTEM_PROMPT)
+        self.assertIn("recent conversation context", llm_fallback.SYSTEM_PROMPT)
+        self.assertIn("ask one short clarifying question", llm_fallback.SYSTEM_PROMPT)
+        self.assertIn("Do not claim to have taken actions", llm_fallback.SYSTEM_PROMPT)
+
+    def test_request_payload_includes_system_prompt_and_history(self):
+        payload = llm_fallback.request_payload(
+            "What did we discuss?",
+            history=[
+                {"role": "user", "message": "I am learning Python."},
+                {"role": "bot", "message": "That is a useful skill."},
+            ],
+        )
+
+        self.assertEqual(
+            payload["system_instruction"]["parts"][0]["text"],
+            llm_fallback.SYSTEM_PROMPT,
+        )
+        self.assertEqual(payload["contents"][0]["role"], "user")
+        self.assertEqual(payload["contents"][1]["role"], "model")
+        self.assertEqual(payload["contents"][-1]["role"], "user")
+        self.assertEqual(
+            payload["contents"][-1]["parts"][0]["text"],
+            "What did we discuss?",
+        )
+
     def test_missing_api_key_raises_llm_unavailable(self):
         llm_fallback.GEMINI_API_KEY = ""
 
@@ -34,6 +61,11 @@ class LLMFallbackTests(unittest.TestCase):
 
         self.assertEqual(result, "Hello from Gemini.")
         mock_post.assert_called_once()
+        request_payload = mock_post.call_args.kwargs["json"]
+        self.assertEqual(
+            request_payload["system_instruction"]["parts"][0]["text"],
+            llm_fallback.SYSTEM_PROMPT,
+        )
 
     @patch("llm_fallback.requests.post")
     def test_malformed_response_raises_llm_unavailable(self, mock_post):
@@ -65,6 +97,11 @@ class LLMFallbackTests(unittest.TestCase):
         result = list(llm_fallback.ask_llm_stream("hello"))
 
         self.assertEqual(result, ["Hello", " there!"])
+        request_payload = mock_post.call_args.kwargs["json"]
+        self.assertEqual(
+            request_payload["system_instruction"]["parts"][0]["text"],
+            llm_fallback.SYSTEM_PROMPT,
+        )
 
     @patch("llm_fallback.requests.post")
     def test_empty_stream_raises_llm_unavailable(self, mock_post):
