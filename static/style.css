@@ -238,6 +238,38 @@ body {
   border-color: var(--border);
 }
 
+.copy-btn {
+  flex-shrink: 0;
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-dim);
+  font-family: var(--font-body);
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.copy-btn:hover:not(:disabled) {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+  background: rgba(255, 176, 0, 0.06);
+}
+
+.copy-btn:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.copy-btn:disabled {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+  cursor: default;
+}
+
 .typing-indicator {
   display: flex;
   align-items: center;
@@ -390,5 +422,9 @@ body {
   .term-meta {
     flex-wrap: wrap;
     gap: 8px 14px;
+  }
+  .copy-btn {
+    font-size: 9px;
+    padding: 2px 5px;
   }
 }
