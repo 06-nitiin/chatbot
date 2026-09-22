@@ -87,6 +87,37 @@ function addCopyButton(botLine, getText) {
   botLine.appendChild(copyButton);
 }
 
+function escapeHtml(text) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderMarkdown(text) {
+  const codeBlocks = [];
+  const codeToken = (index) => `\u0000CODE_BLOCK_${index}\u0000`;
+
+  let rendered = text.replace(/```(?:\w+)?\n?([\s\S]*?)```/g, (_match, code) => {
+    const index = codeBlocks.push(`<pre><code>${escapeHtml(code.replace(/^\n|\n$/g, ""))}</code></pre>`) - 1;
+    return codeToken(index);
+  });
+
+  rendered = escapeHtml(rendered)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br>");
+
+  codeBlocks.forEach((block, index) => {
+    rendered = rendered.replace(codeToken(index), block);
+  });
+
+  return rendered;
+}
+
 function addLine(who, text, confidence, source) {
   const line = document.createElement("div");
   line.className = `line ${who}`;
@@ -197,7 +228,7 @@ async function streamMessage(message) {
 
         if (payload.type === "chunk" && typeof payload.text === "string") {
           fullText += payload.text;
-          textSpan.textContent = fullText;
+          textSpan.innerHTML = renderMarkdown(fullText);
           log.scrollTop = log.scrollHeight;
         } else if (payload.type === "done") {
           source = payload.source;
