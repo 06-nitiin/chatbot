@@ -207,6 +207,58 @@ body {
   flex: 1;
 }
 
+.line.bot .text a {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-decoration-color: var(--cyan-dim);
+  text-underline-offset: 2px;
+}
+
+.line.bot .text a:hover {
+  color: var(--amber);
+  text-decoration-color: var(--amber-dim);
+}
+
+.line.bot .text strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.line.bot .text code {
+  color: var(--amber);
+  background: rgba(255, 176, 0, 0.08);
+  border: 1px solid var(--amber-dim);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: var(--font-body);
+  font-size: 0.92em;
+}
+
+.line.bot .text pre {
+  margin: 10px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: #0a0d0a;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--cyan-dim);
+  border-radius: 4px;
+  white-space: pre;
+}
+
+.line.bot .text pre code {
+  padding: 0;
+  color: var(--cyan);
+  background: transparent;
+  border: none;
+  font-size: 0.9em;
+}
+
+.line.bot .text br + br {
+  display: block;
+  content: "";
+  margin-top: 6px;
+}
+
 .confidence {
   display: inline-block;
   margin-left: 8px;
