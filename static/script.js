@@ -5,6 +5,7 @@ const clock = document.getElementById("clock");
 const micButton = document.getElementById("mic-button");
 const micStatus = document.getElementById("mic-status");
 const clearButton = document.getElementById("clear-btn");
+const exportButton = document.getElementById("export-btn");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
@@ -171,6 +172,35 @@ async function clearConversation() {
 }
 
 clearButton.addEventListener("click", clearConversation);
+
+function exportConversation() {
+  const lines = [...log.querySelectorAll(".line")].map((line) => {
+    const who = line.querySelector(".who")?.textContent?.trim() || "BOT>";
+    const text = line.querySelector(".text")?.textContent?.trim() || "";
+    return `${who} ${text}`.trim();
+  }).filter(Boolean);
+
+  const exportText = lines.join("\n\n") + "\n";
+  const timestamp = new Date().toISOString().replace(/[.:]/g, "-");
+  const blob = new Blob([exportText], { type: "text/plain;charset=utf-8" });
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = downloadUrl;
+  link.download = `chatbot-conversation-${timestamp}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(downloadUrl);
+
+  const originalText = exportButton.textContent;
+  exportButton.textContent = "saved";
+  setTimeout(() => {
+    exportButton.textContent = originalText;
+  }, 1500);
+}
+
+exportButton.addEventListener("click", exportConversation);
 
 async function streamMessage(message) {
   if (isStreaming) return;
