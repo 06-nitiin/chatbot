@@ -6,6 +6,7 @@ const micButton = document.getElementById("mic-button");
 const micStatus = document.getElementById("mic-status");
 const clearButton = document.getElementById("clear-btn");
 const exportButton = document.getElementById("export-btn");
+const speechButton = document.getElementById("speech-btn");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
@@ -23,6 +24,38 @@ const SOURCE_LABELS = {
   llm: "ai",
   fallback: "unmatched",
 };
+
+const speechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+let speechEnabled = false;
+
+function speakResponse(text) {
+  if (!speechSupported || !speechEnabled || !text) return;
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
+function setSpeechEnabled(enabled) {
+  speechEnabled = enabled;
+  speechButton.setAttribute("aria-pressed", String(enabled));
+  speechButton.textContent = enabled ? "voice on" : "voice off";
+
+  if (!enabled && speechSupported) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+if (!speechSupported) {
+  speechButton.disabled = true;
+  speechButton.textContent = "voice n/a";
+  speechButton.title = "Spoken replies are not supported by this browser";
+} else {
+  speechButton.addEventListener("click", () => setSpeechEnabled(!speechEnabled));
+}
 
 function setBusyState(busy) {
   isStreaming = busy;
@@ -161,6 +194,7 @@ async function clearConversation() {
     }
 
     log.replaceChildren();
+    if (speechSupported) window.speechSynthesis.cancel();
     addLine("bot", WELCOME_MESSAGE);
     input.value = "";
     input.focus();
@@ -282,6 +316,7 @@ async function streamMessage(message) {
 
   if (fullText) {
     addCopyButton(botLine, () => fullText);
+    speakResponse(fullText);
   }
 
   if (source === "llm" && fullText) {
