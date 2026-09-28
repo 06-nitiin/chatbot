@@ -145,6 +145,18 @@ body {
   border-color: var(--border);
 }
 
+#stop-btn:not(:disabled) {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(255, 95, 86, 0.06);
+}
+
+#stop-btn:hover:not(:disabled) {
+  color: #ffffff;
+  border-color: var(--danger);
+  background: rgba(255, 95, 86, 0.16);
+}
+
 .clear-btn:disabled,
 .mic-button:disabled,
 .prompt-input:disabled {
