@@ -129,6 +129,22 @@ body {
   border-color: var(--danger);
 }
 
+#speech-btn:hover:not(:disabled) {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+}
+
+#speech-btn[aria-pressed="true"] {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+  background: rgba(94, 234, 212, 0.06);
+}
+
+#speech-btn:disabled {
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
 .clear-btn:disabled,
 .mic-button:disabled,
 .prompt-input:disabled {
