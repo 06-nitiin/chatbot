@@ -7,10 +7,12 @@ const micStatus = document.getElementById("mic-status");
 const clearButton = document.getElementById("clear-btn");
 const exportButton = document.getElementById("export-btn");
 const speechButton = document.getElementById("speech-btn");
+const stopButton = document.getElementById("stop-btn");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
 let isStreaming = false;
+let activeStreamController = null;
 
 function tick() {
   const now = new Date();
@@ -62,6 +64,7 @@ function setBusyState(busy) {
   input.disabled = busy;
   clearButton.disabled = busy;
   micButton.disabled = busy;
+  stopButton.disabled = !busy;
   typingIndicator.classList.toggle("hidden", !busy);
 
   if (!busy) {
@@ -207,6 +210,14 @@ async function clearConversation() {
 
 clearButton.addEventListener("click", clearConversation);
 
+function stopGeneration() {
+  if (activeStreamController) {
+    activeStreamController.abort();
+  }
+}
+
+stopButton.addEventListener("click", stopGeneration);
+
 function exportConversation() {
   const lines = [...log.querySelectorAll(".line")].map((line) => {
     const who = line.querySelector(".who")?.textContent?.trim() || "BOT>";
@@ -239,6 +250,7 @@ exportButton.addEventListener("click", exportConversation);
 async function streamMessage(message) {
   if (isStreaming) return;
   setBusyState(true);
+  activeStreamController = new AbortController();
 
   const botLine = document.createElement("div");
   botLine.className = "line bot";
@@ -261,6 +273,7 @@ async function streamMessage(message) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
+      signal: activeStreamController.signal,
     });
 
     if (res.status === 429) {
@@ -301,9 +314,19 @@ async function streamMessage(message) {
       }
     }
   } catch (err) {
+    if (err.name === "AbortError") {
+      if (fullText) {
+        textSpan.innerHTML = renderMarkdown(fullText);
+      } else {
+        textSpan.textContent = "Generation stopped.";
+      }
+      return;
+    }
+
     textSpan.textContent = fullText || "Connection lost. Is the Flask server still running?";
     return;
   } finally {
+    activeStreamController = null;
     setBusyState(false);
   }
 
