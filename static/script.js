@@ -124,6 +124,20 @@ function addCopyButton(botLine, getText) {
   botLine.appendChild(copyButton);
 }
 
+function addRetryButton(botLine, message) {
+  const retryButton = document.createElement("button");
+  retryButton.type = "button";
+  retryButton.className = "copy-btn retry-btn";
+  retryButton.textContent = "Retry";
+  retryButton.title = "Send the message again";
+  retryButton.addEventListener("click", () => {
+    if (isStreaming) return;
+    retryButton.disabled = true;
+    streamMessage(message);
+  });
+  botLine.appendChild(retryButton);
+}
+
 function escapeHtml(text) {
   return text
     .replaceAll("&", "&amp;")
@@ -279,11 +293,13 @@ async function streamMessage(message) {
     if (res.status === 429) {
       const data = await res.json().catch(() => ({}));
       textSpan.textContent = data.error || "Too many messages - please slow down.";
+      addRetryButton(botLine, message);
       return;
     }
 
     if (!res.ok || !res.body) {
       textSpan.textContent = "Something went wrong talking to the server.";
+      addRetryButton(botLine, message);
       return;
     }
 
@@ -320,10 +336,12 @@ async function streamMessage(message) {
       } else {
         textSpan.textContent = "Generation stopped.";
       }
+      addRetryButton(botLine, message);
       return;
     }
 
     textSpan.textContent = fullText || "Connection lost. Is the Flask server still running?";
+    addRetryButton(botLine, message);
     return;
   } finally {
     activeStreamController = null;
