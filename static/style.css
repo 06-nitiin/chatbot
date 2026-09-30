@@ -350,6 +350,22 @@ body {
   cursor: default;
 }
 
+.retry-btn {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+}
+
+.retry-btn:hover:not(:disabled) {
+  color: var(--bg);
+  border-color: var(--amber);
+  background: var(--amber);
+}
+
+.retry-btn:disabled {
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
 .typing-indicator {
   display: flex;
   align-items: center;
