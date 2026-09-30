@@ -366,6 +366,23 @@ body {
   border-color: var(--border);
 }
 
+.feedback-btn {
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.feedback-btn:hover:not(:disabled) {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+  background: rgba(94, 234, 212, 0.06);
+}
+
+.feedback-btn:disabled {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+  cursor: default;
+}
+
 .typing-indicator {
   display: flex;
   align-items: center;
