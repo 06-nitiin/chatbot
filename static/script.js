@@ -124,6 +124,41 @@ function addCopyButton(botLine, getText) {
   botLine.appendChild(copyButton);
 }
 
+function saveFeedback(rating, source) {
+  try {
+    const stored = JSON.parse(localStorage.getItem("chatbot-feedback") || "[]");
+    stored.push({ rating, source: source || "unknown", createdAt: new Date().toISOString() });
+    localStorage.setItem("chatbot-feedback", JSON.stringify(stored.slice(-50)));
+  } catch (error) {
+    // Feedback is optional; private browsing or disabled storage should not break chat.
+  }
+}
+
+function addFeedbackButtons(botLine, source) {
+  const feedbackButtons = [
+    ["Helpful", "helpful"],
+    ["Not helpful", "not-helpful"],
+  ];
+
+  feedbackButtons.forEach(([label, rating]) => {
+    const feedbackButton = document.createElement("button");
+    feedbackButton.type = "button";
+    feedbackButton.className = "copy-btn feedback-btn";
+    feedbackButton.textContent = label;
+    feedbackButton.title = `Mark this response as ${label.toLowerCase()}`;
+    feedbackButton.addEventListener("click", () => {
+      saveFeedback(rating, source);
+      feedbackButtons.forEach(([otherLabel]) => {
+        const otherButton = [...botLine.querySelectorAll(".feedback-btn")]
+          .find((button) => button.textContent === otherLabel);
+        if (otherButton) otherButton.disabled = true;
+      });
+      feedbackButton.textContent = "Thanks";
+    });
+    botLine.appendChild(feedbackButton);
+  });
+}
+
 function addRetryButton(botLine, message) {
   const retryButton = document.createElement("button");
   retryButton.type = "button";
@@ -357,6 +392,7 @@ async function streamMessage(message) {
 
   if (fullText) {
     addCopyButton(botLine, () => fullText);
+    addFeedbackButtons(botLine, source);
     speakResponse(fullText);
   }
 
