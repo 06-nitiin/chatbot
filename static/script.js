@@ -17,6 +17,17 @@ let activeStreamController = null;
 
 function setChatStatus(message) {
   chatStatus.textContent = message;
+  const state = {
+    "generating response": "active",
+    "response complete": "complete",
+    "generation stopped": "stopped",
+    "conversation cleared": "cleared",
+    "rate limit reached": "error",
+    "server error": "error",
+    "connection error": "error",
+    "could not clear conversation": "error",
+  }[message] || "ready";
+  chatStatus.dataset.state = state;
 }
 
 function tick() {
