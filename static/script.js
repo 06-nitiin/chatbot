@@ -159,12 +159,12 @@ function addFeedbackButtons(botLine, source) {
   });
 }
 
-function addRetryButton(botLine, message) {
+function addRetryButton(botLine, message, label = "Retry") {
   const retryButton = document.createElement("button");
   retryButton.type = "button";
   retryButton.className = "copy-btn retry-btn";
-  retryButton.textContent = "Retry";
-  retryButton.title = "Send the message again";
+  retryButton.textContent = label;
+  retryButton.title = label === "Regenerate" ? "Generate another AI response" : "Send the message again";
   retryButton.addEventListener("click", () => {
     if (isStreaming) return;
     retryButton.disabled = true;
@@ -393,6 +393,9 @@ async function streamMessage(message) {
   if (fullText) {
     addCopyButton(botLine, () => fullText);
     addFeedbackButtons(botLine, source);
+    if (source === "llm") {
+      addRetryButton(botLine, message, "Regenerate");
+    }
     speakResponse(fullText);
   }
 
