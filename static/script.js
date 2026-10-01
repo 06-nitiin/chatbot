@@ -8,11 +8,16 @@ const clearButton = document.getElementById("clear-btn");
 const exportButton = document.getElementById("export-btn");
 const speechButton = document.getElementById("speech-btn");
 const stopButton = document.getElementById("stop-btn");
+const chatStatus = document.getElementById("chat-status");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
 let isStreaming = false;
 let activeStreamController = null;
+
+function setChatStatus(message) {
+  chatStatus.textContent = message;
+}
 
 function tick() {
   const now = new Date();
@@ -66,6 +71,7 @@ function setBusyState(busy) {
   micButton.disabled = busy;
   stopButton.disabled = !busy;
   typingIndicator.classList.toggle("hidden", !busy);
+  if (busy) setChatStatus("generating response");
 
   if (!busy) {
     input.focus();
@@ -248,10 +254,12 @@ async function clearConversation() {
     log.replaceChildren();
     if (speechSupported) window.speechSynthesis.cancel();
     addLine("bot", WELCOME_MESSAGE);
+    setChatStatus("conversation cleared");
     input.value = "";
     input.focus();
   } catch (error) {
     addLine("bot", "I couldn't clear the conversation. Please try again.");
+    setChatStatus("could not clear conversation");
   } finally {
     clearButton.disabled = false;
   }
@@ -328,12 +336,14 @@ async function streamMessage(message) {
     if (res.status === 429) {
       const data = await res.json().catch(() => ({}));
       textSpan.textContent = data.error || "Too many messages - please slow down.";
+      setChatStatus("rate limit reached");
       addRetryButton(botLine, message);
       return;
     }
 
     if (!res.ok || !res.body) {
       textSpan.textContent = "Something went wrong talking to the server.";
+      setChatStatus("server error");
       addRetryButton(botLine, message);
       return;
     }
@@ -371,11 +381,13 @@ async function streamMessage(message) {
       } else {
         textSpan.textContent = "Generation stopped.";
       }
+      setChatStatus("generation stopped");
       addRetryButton(botLine, message);
       return;
     }
 
     textSpan.textContent = fullText || "Connection lost. Is the Flask server still running?";
+    setChatStatus("connection error");
     addRetryButton(botLine, message);
     return;
   } finally {
@@ -397,6 +409,7 @@ async function streamMessage(message) {
       addRetryButton(botLine, message, "Regenerate");
     }
     speakResponse(fullText);
+    setChatStatus("response complete");
   }
 
   if (source === "llm" && fullText) {
