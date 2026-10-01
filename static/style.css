@@ -184,6 +184,37 @@ body {
   margin-left: auto;
 }
 
+.chat-status {
+  color: var(--text-dim);
+  font-size: 10px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.chat-status[data-state="active"] {
+  color: var(--amber);
+}
+
+.chat-status[data-state="complete"] {
+  color: var(--cyan);
+}
+
+.chat-status[data-state="error"] {
+  color: var(--danger);
+}
+
+.chat-status[data-state="stopped"] {
+  color: var(--amber);
+}
+
+.chat-status[data-state="ready"],
+.chat-status[data-state="cleared"] {
+  color: var(--text-dim);
+}
+
 .log {
   flex: 1;
   overflow-y: auto;
