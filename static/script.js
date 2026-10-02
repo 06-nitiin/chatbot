@@ -10,6 +10,7 @@ const speechButton = document.getElementById("speech-btn");
 const stopButton = document.getElementById("stop-btn");
 const chatStatus = document.getElementById("chat-status");
 const messageCount = document.getElementById("message-count");
+const inputCount = document.getElementById("input-count");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
@@ -18,6 +19,13 @@ let activeStreamController = null;
 
 function updateMessageCount() {
   messageCount.textContent = String(log.querySelectorAll(".line").length);
+}
+
+function updateInputCount() {
+  const length = input.value.length;
+  inputCount.textContent = `${length}/1000`;
+  inputCount.classList.toggle("near-limit", length >= 800);
+  inputCount.classList.toggle("at-limit", length >= 1000);
 }
 
 function setChatStatus(message) {
@@ -290,6 +298,7 @@ async function clearConversation() {
     addLine("bot", WELCOME_MESSAGE);
     setChatStatus("conversation cleared");
     input.value = "";
+    updateInputCount();
     input.focus();
   } catch (error) {
     addLine("bot", "I couldn't clear the conversation. Please try again.");
@@ -486,8 +495,12 @@ form.addEventListener("submit", (e) => {
 
   addLine("user", message);
   input.value = "";
+  updateInputCount();
   streamMessage(message);
 });
+
+input.addEventListener("input", updateInputCount);
+updateInputCount();
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -528,6 +541,7 @@ if (!SpeechRecognition) {
       transcript += event.results[i][0].transcript;
     }
     input.value = transcript;
+    updateInputCount();
     input.scrollLeft = input.scrollWidth;
   });
 
@@ -537,6 +551,7 @@ if (!SpeechRecognition) {
     if (message && !isStreaming) {
       addLine("user", message);
       input.value = "";
+      updateInputCount();
       streamMessage(message);
     }
   });
