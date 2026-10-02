@@ -286,6 +286,20 @@ function stopGeneration() {
 
 stopButton.addEventListener("click", stopGeneration);
 
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+
+  if (isStreaming) {
+    stopGeneration();
+    return;
+  }
+
+  if (speechSupported && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    setChatStatus("speech stopped");
+  }
+});
+
 function exportConversation() {
   const lines = [...log.querySelectorAll(".line")].map((line) => {
     const who = line.querySelector(".who")?.textContent?.trim() || "BOT>";
