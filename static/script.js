@@ -221,6 +221,22 @@ function renderMarkdown(text) {
   return rendered;
 }
 
+function formatMessageTime(date = new Date()) {
+  return date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function addMessageTime(line) {
+  const timestamp = document.createElement("time");
+  timestamp.className = "message-time";
+  timestamp.dateTime = new Date().toISOString();
+  timestamp.textContent = formatMessageTime();
+  timestamp.title = `Sent at ${timestamp.textContent}`;
+  line.appendChild(timestamp);
+}
+
 function addLine(who, text, confidence, source) {
   const line = document.createElement("div");
   line.className = `line ${who}`;
@@ -234,6 +250,7 @@ function addLine(who, text, confidence, source) {
   textSpan.textContent = text;
 
   line.appendChild(whoSpan);
+  addMessageTime(line);
   line.appendChild(textSpan);
 
   if (who === "bot" && source) {
@@ -303,8 +320,9 @@ document.addEventListener("keydown", (event) => {
 function exportConversation() {
   const lines = [...log.querySelectorAll(".line")].map((line) => {
     const who = line.querySelector(".who")?.textContent?.trim() || "BOT>";
+    const time = line.querySelector(".message-time")?.textContent?.trim() || "";
     const text = line.querySelector(".text")?.textContent?.trim() || "";
-    return `${who} ${text}`.trim();
+    return `${time ? `[${time}] ` : ""}${who} ${text}`.trim();
   }).filter(Boolean);
 
   const exportText = lines.join("\n\n") + "\n";
@@ -339,9 +357,15 @@ async function streamMessage(message) {
   const whoSpan = document.createElement("span");
   whoSpan.className = "who";
   whoSpan.textContent = "BOT>";
+  const timestamp = document.createElement("time");
+  timestamp.className = "message-time";
+  timestamp.dateTime = new Date().toISOString();
+  timestamp.textContent = formatMessageTime();
+  timestamp.title = `Sent at ${timestamp.textContent}`;
   const textSpan = document.createElement("span");
   textSpan.className = "text";
   botLine.appendChild(whoSpan);
+  botLine.appendChild(timestamp);
   botLine.appendChild(textSpan);
   log.appendChild(botLine);
   log.scrollTop = log.scrollHeight;
