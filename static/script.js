@@ -9,11 +9,16 @@ const exportButton = document.getElementById("export-btn");
 const speechButton = document.getElementById("speech-btn");
 const stopButton = document.getElementById("stop-btn");
 const chatStatus = document.getElementById("chat-status");
+const messageCount = document.getElementById("message-count");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
 let isStreaming = false;
 let activeStreamController = null;
+
+function updateMessageCount() {
+  messageCount.textContent = String(log.querySelectorAll(".line").length);
+}
 
 function setChatStatus(message) {
   chatStatus.textContent = message;
@@ -261,6 +266,7 @@ function addLine(who, text, confidence, source) {
   }
 
   log.appendChild(line);
+  updateMessageCount();
   log.scrollTop = log.scrollHeight;
 }
 
@@ -368,6 +374,7 @@ async function streamMessage(message) {
   botLine.appendChild(timestamp);
   botLine.appendChild(textSpan);
   log.appendChild(botLine);
+  updateMessageCount();
   log.scrollTop = log.scrollHeight;
 
   let fullText = "";
