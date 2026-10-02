@@ -250,6 +250,15 @@ body {
   font-size: 13px;
 }
 
+.message-time {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-size: 10px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
 .line.bot .who {
   color: var(--cyan);
 }
@@ -570,5 +579,8 @@ body {
   .copy-btn {
     font-size: 9px;
     padding: 2px 5px;
+  }
+  .message-time {
+    font-size: 9px;
   }
 }
