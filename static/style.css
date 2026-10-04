@@ -497,6 +497,22 @@ body {
   color: var(--text-dim);
 }
 
+.input-count {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s;
+}
+
+.input-count.near-limit {
+  color: var(--amber);
+}
+
+.input-count.at-limit {
+  color: var(--danger);
+}
+
 .mic-button {
   flex-shrink: 0;
   background: transparent;
@@ -581,6 +597,9 @@ body {
     padding: 2px 5px;
   }
   .message-time {
+    font-size: 9px;
+  }
+  .input-count {
     font-size: 9px;
   }
 }
