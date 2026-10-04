@@ -55,9 +55,11 @@
           class="prompt-input"
           placeholder="type or speak a message..."
           maxlength="1000"
+          aria-label="Message to chatbot"
+          aria-describedby="input-count"
           autofocus
         >
-        <span id="input-count" class="input-count">0/1000</span>
+        <span id="input-count" class="input-count" aria-live="polite">0/1000</span>
         <span class="cursor" aria-hidden="true"></span>
         <button type="button" id="mic-button" class="mic-button" title="Speak your message" aria-label="Voice input">
           <svg class="mic-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
