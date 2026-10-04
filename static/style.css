@@ -551,6 +551,14 @@ body {
   min-height: 14px;
 }
 
+.shortcut-hint {
+  padding: 0 16px 10px;
+  color: var(--text-dim);
+  font-size: 10px;
+  text-align: right;
+  opacity: 0.8;
+}
+
 .cursor {
   width: 8px;
   height: 16px;
@@ -600,6 +608,10 @@ body {
     font-size: 9px;
   }
   .input-count {
+    font-size: 9px;
+  }
+  .shortcut-hint {
+    padding-bottom: 8px;
     font-size: 9px;
   }
 }
