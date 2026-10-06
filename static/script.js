@@ -6,6 +6,7 @@ const micButton = document.getElementById("mic-button");
 const micStatus = document.getElementById("mic-status");
 const clearButton = document.getElementById("clear-btn");
 const exportButton = document.getElementById("export-btn");
+const exportJsonButton = document.getElementById("export-json-btn");
 const speechButton = document.getElementById("speech-btn");
 const stopButton = document.getElementById("stop-btn");
 const chatStatus = document.getElementById("chat-status");
@@ -332,13 +333,28 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-function exportConversation() {
-  const lines = [...log.querySelectorAll(".line")].map((line) => {
+function getConversationRecords() {
+  return [...log.querySelectorAll(".line")].map((line) => {
     const who = line.querySelector(".who")?.textContent?.trim() || "BOT>";
-    const time = line.querySelector(".message-time")?.textContent?.trim() || "";
+    const timeElement = line.querySelector(".message-time");
+    const sourceElement = line.querySelector(".confidence");
     const text = line.querySelector(".text")?.textContent?.trim() || "";
-    return `${time ? `[${time}] ` : ""}${who} ${text}`.trim();
-  }).filter(Boolean);
+    const sourceClass = sourceElement?.className.match(/source-([^\s]+)/);
+    return {
+      role: who.startsWith("BOT") ? "bot" : "user",
+      timestamp: timeElement?.dateTime || null,
+      time: timeElement?.textContent?.trim() || null,
+      source: sourceClass ? sourceClass[1] : null,
+      text,
+    };
+  }).filter((record) => record.text);
+}
+
+function exportConversation() {
+  const lines = getConversationRecords().map((record) => {
+    const who = record.role === "bot" ? "BOT>" : "YOU>";
+    return `${record.time ? `[${record.time}] ` : ""}${who} ${record.text}`.trim();
+  });
 
   const exportText = lines.join("\n\n") + "\n";
   const timestamp = new Date().toISOString().replace(/[.:]/g, "-");
@@ -361,6 +377,33 @@ function exportConversation() {
 }
 
 exportButton.addEventListener("click", exportConversation);
+
+function exportConversationJson() {
+  const exportText = JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    messageCount: getConversationRecords().length,
+    messages: getConversationRecords(),
+  }, null, 2) + "\n";
+  const timestamp = new Date().toISOString().replace(/[.:]/g, "-");
+  const blob = new Blob([exportText], { type: "application/json;charset=utf-8" });
+  const downloadUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = downloadUrl;
+  link.download = `chatbot-conversation-${timestamp}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(downloadUrl);
+
+  const originalText = exportJsonButton.textContent;
+  exportJsonButton.textContent = "saved";
+  setTimeout(() => {
+    exportJsonButton.textContent = originalText;
+  }, 1500);
+}
+
+exportJsonButton.addEventListener("click", exportConversationJson);
 
 async function streamMessage(message) {
   if (isStreaming) return;
