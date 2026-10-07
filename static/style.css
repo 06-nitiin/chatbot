@@ -129,6 +129,16 @@ body {
   border-color: var(--danger);
 }
 
+#export-json-btn:hover:not(:disabled) {
+  color: var(--cyan);
+  border-color: var(--cyan-dim);
+}
+
+#export-json-btn:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 2px;
+}
+
 #speech-btn:hover:not(:disabled) {
   color: var(--cyan);
   border-color: var(--cyan-dim);
