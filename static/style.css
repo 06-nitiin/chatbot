@@ -606,6 +606,23 @@ body {
   .terminal {
     height: 80vh;
   }
+  .term-head {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .term-head-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .term-head-right .clear-btn {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+  .term-head-right #clock {
+    width: 100%;
+    text-align: right;
+  }
   .term-meta {
     flex-wrap: wrap;
     gap: 8px 14px;
