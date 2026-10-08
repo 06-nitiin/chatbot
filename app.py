@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+from datetime import datetime
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request, session, stream_with_context
@@ -70,7 +71,14 @@ def health():
 
 @app.route("/")
 def index():
-    return render_template("index.html", intent_count=len(bot_engine.INTENTS))
+    current_time = datetime.now().astimezone()
+    return render_template(
+        "index.html",
+        intent_count=len(bot_engine.INTENTS),
+        current_time=current_time.strftime("%H:%M"),
+        current_time_iso=current_time.isoformat(timespec="seconds"),
+        current_time_full=current_time.strftime("%Y-%m-%d %H:%M:%S %Z"),
+    )
 
 
 @app.route("/api/chat", methods=["POST"])
