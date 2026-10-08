@@ -242,12 +242,20 @@ function formatMessageTime(date = new Date()) {
   });
 }
 
+function formatFullMessageTime(date = new Date()) {
+  return date.toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "medium",
+  });
+}
+
 function addMessageTime(line) {
+  const date = new Date();
   const timestamp = document.createElement("time");
   timestamp.className = "message-time";
-  timestamp.dateTime = new Date().toISOString();
-  timestamp.textContent = formatMessageTime();
-  timestamp.title = `Sent at ${timestamp.textContent}`;
+  timestamp.dateTime = date.toISOString();
+  timestamp.textContent = formatMessageTime(date);
+  timestamp.title = formatFullMessageTime(date);
   line.appendChild(timestamp);
 }
 
@@ -415,15 +423,10 @@ async function streamMessage(message) {
   const whoSpan = document.createElement("span");
   whoSpan.className = "who";
   whoSpan.textContent = "BOT>";
-  const timestamp = document.createElement("time");
-  timestamp.className = "message-time";
-  timestamp.dateTime = new Date().toISOString();
-  timestamp.textContent = formatMessageTime();
-  timestamp.title = `Sent at ${timestamp.textContent}`;
   const textSpan = document.createElement("span");
   textSpan.className = "text";
   botLine.appendChild(whoSpan);
-  botLine.appendChild(timestamp);
+  addMessageTime(botLine);
   botLine.appendChild(textSpan);
   log.appendChild(botLine);
   updateMessageCount();
