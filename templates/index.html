@@ -78,6 +78,16 @@
         Enter to send &middot; Escape to stop
       </div>
     </div>
+    <dialog id="clear-dialog" class="clear-dialog">
+      <form method="dialog">
+        <h2>Clear conversation?</h2>
+        <p>Your current conversation will be removed from this session.</p>
+        <div class="dialog-actions">
+          <button value="cancel" class="clear-btn" type="submit">cancel</button>
+          <button id="confirm-clear-btn" value="confirm" class="clear-btn confirm-clear-btn" type="submit">clear</button>
+        </div>
+      </form>
+    </dialog>
     <p class="footnote">context-aware bot &middot; local AI fallback &middot; <a href="https://github.com/06-nitiin/chatbot" target="_blank" rel="noopener">source</a></p>
   </div>
 
