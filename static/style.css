@@ -236,6 +236,16 @@ body {
   line-height: 1.55;
 }
 
+.empty-state {
+  margin: auto;
+  padding: 18px;
+  color: var(--text-dim);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+}
+
 .log::-webkit-scrollbar {
   width: 8px;
 }
