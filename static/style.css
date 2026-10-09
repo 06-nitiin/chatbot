@@ -631,6 +631,15 @@ body {
     font-size: 9px;
     padding: 2px 5px;
   }
+  .line.bot {
+    flex-wrap: wrap;
+  }
+  .line.bot .text {
+    min-width: calc(100% - 60px);
+  }
+  .line.bot .copy-btn {
+    margin-left: 0;
+  }
   .message-time {
     font-size: 9px;
   }
