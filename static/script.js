@@ -12,6 +12,7 @@ const stopButton = document.getElementById("stop-btn");
 const chatStatus = document.getElementById("chat-status");
 const messageCount = document.getElementById("message-count");
 const inputCount = document.getElementById("input-count");
+const emptyState = document.getElementById("empty-state");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
@@ -19,7 +20,9 @@ let isStreaming = false;
 let activeStreamController = null;
 
 function updateMessageCount() {
-  messageCount.textContent = String(log.querySelectorAll(".line").length);
+  const count = log.querySelectorAll(".line").length;
+  messageCount.textContent = String(count);
+  emptyState.hidden = count > 0;
 }
 
 function updateInputCount() {
@@ -302,7 +305,7 @@ async function clearConversation() {
       throw new Error("Could not clear the conversation");
     }
 
-    log.replaceChildren();
+    log.querySelectorAll(".line").forEach((line) => line.remove());
     if (speechSupported) window.speechSynthesis.cancel();
     addLine("bot", WELCOME_MESSAGE);
     setChatStatus("conversation cleared");
