@@ -37,6 +37,9 @@
       </div>
 
       <main class="log" id="log" aria-live="polite">
+        <div id="empty-state" class="empty-state" hidden>
+          No messages yet. Start a conversation below.
+        </div>
         <div class="line bot">
           <span class="who">BOT&gt;</span>
           <time class="message-time" datetime="{{ current_time_iso }}" title="{{ current_time_full }}">{{ current_time }}</time>
