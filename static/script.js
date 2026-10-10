@@ -13,6 +13,8 @@ const chatStatus = document.getElementById("chat-status");
 const messageCount = document.getElementById("message-count");
 const inputCount = document.getElementById("input-count");
 const emptyState = document.getElementById("empty-state");
+const clearDialog = document.getElementById("clear-dialog");
+const confirmClearButton = document.getElementById("confirm-clear-btn");
 const typingIndicator = document.getElementById("typing-indicator");
 
 const WELCOME_MESSAGE = 'Hi. I now remember our conversation context — try "hi", "give me advice", then "another one". You can also click the mic to talk.';
@@ -320,7 +322,22 @@ async function clearConversation() {
   }
 }
 
-clearButton.addEventListener("click", clearConversation);
+function requestClearConversation() {
+  if (isStreaming) return;
+
+  if (typeof clearDialog.showModal === "function") {
+    clearDialog.showModal();
+  } else if (window.confirm("Clear conversation?")) {
+    clearConversation();
+  }
+}
+
+clearButton.addEventListener("click", requestClearConversation);
+confirmClearButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  clearDialog.close("confirm");
+  clearConversation();
+});
 
 function stopGeneration() {
   if (activeStreamController) {
