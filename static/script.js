@@ -350,6 +350,11 @@ stopButton.addEventListener("click", stopGeneration);
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
 
+  if (clearDialog.open) {
+    clearDialog.close("cancel");
+    return;
+  }
+
   if (isStreaming) {
     stopGeneration();
     return;
