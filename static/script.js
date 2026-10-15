@@ -327,6 +327,7 @@ function requestClearConversation() {
 
   if (typeof clearDialog.showModal === "function") {
     clearDialog.showModal();
+    confirmClearButton.focus();
   } else if (window.confirm("Clear conversation?")) {
     clearConversation();
   }
@@ -337,6 +338,10 @@ confirmClearButton.addEventListener("click", (event) => {
   event.preventDefault();
   clearDialog.close("confirm");
   clearConversation();
+});
+
+clearDialog.addEventListener("close", () => {
+  clearButton.focus();
 });
 
 function stopGeneration() {
