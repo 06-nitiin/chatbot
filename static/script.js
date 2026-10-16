@@ -344,6 +344,12 @@ clearDialog.addEventListener("close", () => {
   clearButton.focus();
 });
 
+clearDialog.addEventListener("click", (event) => {
+  if (event.target === clearDialog) {
+    clearDialog.close("cancel");
+  }
+});
+
 function stopGeneration() {
   if (activeStreamController) {
     activeStreamController.abort();
