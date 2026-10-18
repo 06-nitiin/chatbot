@@ -78,10 +78,15 @@
         Enter to send &middot; Escape to stop
       </div>
     </div>
-    <dialog id="clear-dialog" class="clear-dialog">
+    <dialog
+      id="clear-dialog"
+      class="clear-dialog"
+      aria-labelledby="clear-dialog-title"
+      aria-describedby="clear-dialog-description"
+    >
       <form method="dialog">
-        <h2>Clear conversation?</h2>
-        <p>Your current conversation will be removed from this session.</p>
+        <h2 id="clear-dialog-title">Clear conversation?</h2>
+        <p id="clear-dialog-description">Your current conversation will be removed from this session.</p>
         <div class="dialog-actions">
           <button value="cancel" class="clear-btn" type="submit">cancel</button>
           <button id="confirm-clear-btn" value="confirm" class="clear-btn confirm-clear-btn" type="submit">clear</button>
